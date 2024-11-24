@@ -11,7 +11,7 @@ class Settings(BaseSettings):
 
     debug: bool = True
     bot_token: str = '8094916643:AAF93MkXE_BWCTv6FBXTqNrJ2bUHjdELGKI'
-    base_webhook_url: str = 'https://1456-95-26-98-89.ngrok-free.app'
+    base_webhook_url: str = 'https://arenda-bot.vercel.app/'
     webhook_path: str = '/webhook'
     admin_chat_id: int = -1002374845535
     admin_topic_id: int = 2
