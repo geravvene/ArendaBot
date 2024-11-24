@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Список квартир</title>
+    <link rel="stylesheet" href="{{url_for('static', path='/delete.css')}}" />
+  </head>
+  <body>
+    <h1>Список квартир</h1>
+    <div id="apartments-container">
+      <ul id="apartments-list"></ul>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const apartmentsList = document.getElementById("apartments-list");
+        const apartments={{ data | tojson }};
+        // Загрузка списка квартир с сервера
+        function loadApartments() {
+            apartmentsList.innerHTML = ""; // Очистка списка
+            apartments.forEach((apartment, index) => {
+              const li = document.createElement("li");
+              li.innerHTML = `
+                        <span>${apartment.city}, ${apartment.address} — ${apartment.propertyType}</span>
+                        <button class="delete-button" data-index=${index} data-id="${apartment._id}">Удалить</button>
+                    `;
+              apartmentsList.appendChild(li);
+            })
+        }
+
+        // Удаление квартиры
+        async function deleteApartment(id, index) {
+          try {
+            const response = await fetch(
+              `http://127.0.0.1:8000/aparts/delete/${id}`,
+              {
+                method: "DELETE",
+              }
+            );
+
+            if (!response.ok) throw new Error("Ошибка удаления квартиры");
+
+            alert("Квартира успешно удалена");
+            delete apartments[index]
+            loadApartments(); // Перезагрузка списка после удаления
+          } catch (error) {
+            console.error(error);
+            alert("Ошибка при удалении квартиры");
+          }
+        }
+
+        // Обработчик клика на кнопку "Удалить"
+        apartmentsList.addEventListener("click", (e) => {
+          if (e.target.classList.contains("delete-button")) {
+            const apartmentId = e.target.dataset.id;
+            if (confirm("Вы уверены, что хотите удалить эту квартиру?")) {
+              deleteApartment(e.target.dataset.id, e.target.dataset.index);
+            }
+          }
+        });
+
+        // Загрузка квартир при загрузке страницы
+        loadApartments();
+
+      });
+    </script>
+  </body>
+</html>

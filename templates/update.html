@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit</title>
+    <link rel="stylesheet" href="{{url_for('static', path='/styles.css')}}" />
+  </head>
+  <body>
+    <div class="form-container">
+      <form id="edit-property-form">
+        <h1>Редактирование недвижимости</h1>
+
+        <label for="city">Город</label>
+        <input type="text" id="city" name="city" required />
+
+        <label for="address">Адрес</label>
+        <input type="text" id="address" name="address" required />
+
+        <label for="description">Описание</label>
+        <textarea id="description" name="description" required></textarea>
+
+        <label for="directions">Как добраться</label>
+        <textarea id="directions" name="directions" required></textarea>
+
+        <label for="wifi-password">Пароль от Wi-Fi</label>
+        <input type="text" id="wifi-password" name="wifiPassword" required />
+
+        <label for="property-type">Тип жилья</label>
+        <input type="text" id="property-type" name="propertyType" required />
+
+        <label for="bedrooms">Количество спальных мест</label>
+        <input type="text" id="bedrooms" name="bedrooms" required />
+
+        <label for="area">Площадь (м²)</label>
+        <input type="number" id="area" name="area" required />
+
+        <label for="floor">Этаж</label>
+        <input type="number" id="floor" name="floor" required />
+
+        <label for="manager-name">Имя менеджера</label>
+        <input type="text" id="manager-name" name="managerName" required />
+
+        <label for="phone">Телефон</label>
+        <input type="tel" id="phone" name="phone" required />
+
+        <fieldset>
+          <legend>Дополнительные удобства</legend>
+          <div id="amenities-list"></div>
+        </fieldset>
+
+        <div id="add-photo">
+          <label for="photo-urls">Добавить фотографии</label>
+          <textarea
+            id="photo-urls"
+            rows="5"
+            placeholder="Введите ссылки на фотографии, каждая с новой строки"
+          ></textarea>
+          <button type="button" id="add-photos-button">Добавить</button>
+        </div>
+        <div id="uploaded-photos">
+          <h3>Список фотографий</h3>
+          <ul id="photos-list"></ul>
+        </div>
+
+        <button type="submit">Сохранить изменения</button>
+      </form>
+    </div>
+
+    <script>
+      const defaultData = {{ data | tojson }};
+      const allAmenities = [
+        "Стиральная машина",
+        "Интернет Wi-Fi",
+        "Телевизор",
+        "Кондиционер",
+        "Можно с детьми",
+        "Для мероприятий",
+        "Холодильник",
+        "Телефон",
+        "Кухонная плита",
+        "Посудомоечная машина",
+        "Музыкальный центр",
+        "СВЧ печь",
+        "Утюг с гладильной доской",
+        "Консьерж",
+        "Парковка",
+        "Сейф",
+        "Водонагреватель",
+        "Кабельное Телевидение",
+        "Ванные принадлежности",
+        "Можно с животными",
+        "Можно курить",
+        "Для романтических встреч",
+        "C джакузи",
+        "Балкон",
+        "Лифт",
+      ];
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const form = document.getElementById("edit-property-form");
+        const photosList = document.getElementById("photos-list");
+        const photoUrlsInput = document.getElementById("photo-urls");
+        const addPhotosButton = document.getElementById("add-photos-button");
+
+        // Функция для обновления отображения списка фотографий
+        function updatePhotoList() {
+          photosList.innerHTML = ""; // Очищаем список
+          defaultData.photos.forEach((photo, index) => {
+            const li = document.createElement("li");
+            li.innerHTML = `
+                    <img src="${photo}" alt="Photo ${index + 1}" width="200">
+                    <button type="button" class="delete-photo" data-index="${index}">Удалить</button>
+                `;
+            photosList.appendChild(li);
+          });
+        }
+
+        // Заполнение формы и списка фотографий при загрузке
+        form.city.value = defaultData.city;
+        form.address.value = defaultData.address;
+        form.description.value = defaultData.description;
+        form.directions.value = defaultData.directions;
+        form.wifiPassword.value = defaultData.wifiPassword;
+        form.propertyType.value = defaultData.propertyType;
+        form.bedrooms.value = defaultData.bedrooms;
+        form.area.value = defaultData.area;
+        form.floor.value = defaultData.floor;
+        form.managerName.value = defaultData.managerName;
+        form.phone.value = defaultData.phone;
+
+        const amenitiesList = document.getElementById("amenities-list");
+        allAmenities.forEach((amenity) => {
+          const checked = defaultData.amenities.includes(amenity)
+            ? "checked"
+            : "";
+          const label = document.createElement("label");
+          label.innerHTML = `
+                <input type="checkbox" name="amenities" value="${amenity}" ${checked}> ${amenity}
+            `;
+          amenitiesList.appendChild(label);
+        });
+
+        updatePhotoList();
+
+        addPhotosButton.addEventListener("click", () => {
+          const urls = photoUrlsInput.value
+            .trim()
+            .split("\n")
+            .map((url) => url.trim())
+            .filter((url) => url !== ""); // Убираем пустые строки
+
+          if (urls.length > 0) {
+            defaultData.photos.push(...urls); // Добавляем ссылки в массив
+            updatePhotoList(); // Обновляем список фотографий
+            photoUrlsInput.value = ""; // Очищаем поле ввода
+          }
+        });
+
+        // Удаление фотографии по индексу
+        photosList.addEventListener("click", (e) => {
+          if (e.target.classList.contains("delete-photo")) {
+            const index = parseInt(e.target.dataset.index, 10);
+            defaultData.photos.splice(index, 1); // Удаляем фото из массива
+            updatePhotoList(); // Обновляем отображение списка
+          }
+        });
+
+        // Сохранение изменений
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const formData = new FormData(form);
+
+          const amenities = [];
+          formData.getAll("amenities").forEach((item) => amenities.push(item));
+
+          const updatedData = {
+            _id: defaultData._id,
+            city: formData.get("city"),
+            address: formData.get("address"),
+            description: formData.get("description"),
+            directions: formData.get("directions"),
+            wifiPassword: formData.get("wifiPassword"),
+            propertyType: formData.get("propertyType"),
+            bedrooms: formData.get("bedrooms"),
+            area: formData.get("area"),
+            floor: formData.get("floor"),
+            managerName: formData.get("managerName"),
+            phone: formData.get("phone"),
+            amenities: amenities,
+            photos: defaultData.photos, // Используем обновленный массив ссылок
+          };
+            try {
+            const response = await fetch(
+              "http://127.0.0.1:8000/aparts/save/update",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(updatedData),
+              }
+            );
+
+            if (response.ok) {
+              const result = await response.json();
+              alert("Данные успешно отправлены на сервер!");
+              console.log("Server Response:", result);
+            } else {
+              alert("Ошибка при отправке данных на сервер.");
+              console.error("Server Error:", response.statusText);
+            }
+          } catch (error) {
+            alert("Ошибка соединения с сервером.");
+            console.error("Network Error:", error);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

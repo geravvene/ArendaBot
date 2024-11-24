@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit</title>
+    <link rel="stylesheet" href="{{url_for('static', path='/styles.css')}}" />
+  </head>
+  <body>
+    <div class="form-container">
+      <form id="edit-property-form">
+        <h1>Редактирование недвижимости</h1>
+
+        <label for="privetstvie">Приветствие</label>
+        <input type="text" id="privetstvie" name="privetstvie" required />
+
+        <label for="code">Введите код</label>
+        <input type="text" id="code" name="code" required />
+
+        <label for="hi_user">Приветствие админа/горничной</label>
+        <textarea id="hi_user" name="hi_user" required></textarea>
+
+        <label for="hi_reserv">Приветствие при введение кода квартиры</label>
+        <textarea id="hi_reserv" name="hi_reserv" required></textarea>
+
+        <label for="faq_basic">FAQ без брони</label>
+        <input type="text" id="faq_basic" name="faq_basic" required />
+
+        <label for="faq_maid">FAQ горничная</label>
+        <input type="text" id="faq_maid" name="faq_maid" required />
+
+        <label for="clean_info">инфо уборка</label>
+        <input type="text" id="clean_info" name="clean_info" required />
+
+        <label for="clean_rules">Правила уборки</label>
+        <input type="text" id="clean_rules" name="clean_rules" required />
+
+        <label for="clean_items">Расходники</label>
+        <input type="text" id="clean_items" name="clean_items" required />
+
+        <label for="make_rent">кнопка Забронировать 🏠</label>
+        <input type="text" id="make_rent" name="make_rent" required />
+
+        <label for="enter">кнопка Войти ✅</label>
+        <input type="text" id="enter" name="enter" required />
+
+        <label for="text_faq">кнопка Частые вопросы ❓</label>
+        <input type="text" id="text_faq" name="text_faq" required />
+
+        <label for="text_supp">кнопка Тех. поддержка 💬</label>
+        <input type="text" id="text_supp" name="text_supp" required />
+
+        <label for="text_info_rent">кнопка Информация 🏠</label>
+        <input type="text" id="text_info_rent" name="text_info_rent" required />
+
+        <label for="text_photo">кнопка Фото ✅</label>
+        <input type="text" id="text_photo" name="text_photo" required />
+
+        <button type="submit">Сохранить изменения</button>
+      </form>
+    </div>
+
+    <script>
+        const defaultData = {{ data | tojson }};
+        document.addEventListener("DOMContentLoaded", () => {
+        const form = document.getElementById("edit-property-form");
+
+        // Заполнение формы и списка фотографий при загрузке
+        form.privetstvie.value = defaultData.privetstvie;
+        form.code.value = defaultData.code;
+        form.hi_user.value = defaultData.hi_user;
+        form.hi_reserv.value = defaultData.hi_reserv;
+        form.faq_basic.value = defaultData.faq_basic;
+        form.faq_maid.value = defaultData.faq_maid;
+        form.clean_info.value = defaultData.clean_info;
+        form.clean_rules.value = defaultData.clean_rules;
+        form.clean_items.value = defaultData.clean_items;
+        form.make_rent.value = defaultData.make_rent;
+        form.enter.value = defaultData.enter;
+        form.text_faq.value = defaultData.text_faq;
+        form.text_supp.value = defaultData.text_supp;
+        form.text_info_rent.value = defaultData.text_info_rent;
+        form.text_photo.value = defaultData.text_photo;
+
+        // Сохранение изменений
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const formData = new FormData(form);
+
+          const updatedData = {
+            _id:defaultData['_id'],
+            privetstvie: formData.get("privetstvie"),
+            code: formData.get("code"),
+            hi_user: formData.get("hi_user"),
+            hi_reserv: formData.get("hi_reserv"),
+            faq_basic: formData.get("faq_basic"),
+            faq_maid: formData.get("faq_maid"),
+            clean_info: formData.get("clean_info"),
+            clean_rules: formData.get("clean_rules"),
+            clean_items: formData.get("clean_items"),
+            make_rent: formData.get("make_rent"),
+            enter: formData.get("enter"),
+            text_faq: formData.get("text_faq"),
+            make_rent: formData.get("make_rent"),
+            text_supp: formData.get("text_supp"),
+            text_info_rent: formData.get("text_info_rent"),
+            text_photo: formData.get("text_photo"),
+          };
+          try {
+            const response = await fetch("http://127.0.0.1:8000/texts/update", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(updatedData),
+            });
+
+            if (response.ok) {
+              const result = await response.json();
+              alert("Данные успешно отправлены на сервер!");
+              console.log("Server Response:", result);
+            } else {
+              alert("Ошибка при отправке данных на сервер.");
+              console.error("Server Error:", response.statusText);
+            }
+          } catch (error) {
+            alert("Ошибка соединения с сервером.");
+            console.error("Network Error:", error);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
